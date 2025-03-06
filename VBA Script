@@ -36,18 +36,19 @@ Sub challenge()
             openpri = ThisWorkbook.Sheets(ws).Cells(r, 3).Value
             volm = 0
             Do While ticker = ThisWorkbook.Sheets(ws).Cells(r + 1, 1).Value
-                r = r + 1
                 volm = volm + ThisWorkbook.Sheets(ws).Cells(r, 7).Value
+                r = r + 1
             Loop
             
             closepri = ThisWorkbook.Sheets(ws).Cells(r, 6).Value
+            volm = volm + ThisWorkbook.Sheets(ws).Cells(r, 7).Value
             
             ThisWorkbook.Sheets(ws).Cells(i, 9).Value = ticker
             ' Quarterly Change (difference)
             ThisWorkbook.Sheets(ws).Cells(i, 10).Value = closepri - openpri
             
             ' Percent Change
-            ThisWorkbook.Sheets(ws).Cells(i, 11).Value = (closepri - openpri) / closepri
+            ThisWorkbook.Sheets(ws).Cells(i, 11).Value = (closepri - openpri) / openpri
             
             ' Total Volume Stock
             ThisWorkbook.Sheets(ws).Cells(i, 12).Value = volm
@@ -126,3 +127,4 @@ Sub challenge()
     Loop
     
 End Sub
+
