@@ -1,0 +1,128 @@
+Option Explicit
+
+Sub challenge()
+
+    Dim ws As Integer
+    Dim r As Single
+    Dim i As Integer
+    Dim ticker As String
+    Dim openpri As Single
+    Dim closepri As Single
+    Dim volm As Single
+    Dim incPer As Single
+    Dim incTik As String
+    Dim decPer As Single
+    Dim decTik As String
+    Dim volMax As Single
+    Dim volTik As String
+    
+    
+    
+    ' Loop through sheets
+    ws = 1
+    Do Until ws > ThisWorkbook.Sheets.Count
+    
+        ' Set up the results area
+        ThisWorkbook.Sheets(ws).Cells(1, 9).Value = "Ticker"
+        ThisWorkbook.Sheets(ws).Cells(1, 10).Value = "Quarterly Change"
+        ThisWorkbook.Sheets(ws).Cells(1, 11).Value = "Percent Change"
+        ThisWorkbook.Sheets(ws).Cells(1, 12).Value = "Total Stock Volume"
+        
+        ' Loop through rows
+        i = 2
+        r = 2
+        Do Until IsEmpty(ThisWorkbook.Sheets(ws).Cells(r, 1))
+            ticker = ThisWorkbook.Sheets(ws).Cells(r, 1).Value
+            openpri = ThisWorkbook.Sheets(ws).Cells(r, 3).Value
+            volm = 0
+            Do While ticker = ThisWorkbook.Sheets(ws).Cells(r + 1, 1).Value
+                r = r + 1
+                volm = volm + ThisWorkbook.Sheets(ws).Cells(r, 7).Value
+            Loop
+            
+            closepri = ThisWorkbook.Sheets(ws).Cells(r, 6).Value
+            
+            ThisWorkbook.Sheets(ws).Cells(i, 9).Value = ticker
+            ' Quarterly Change (difference)
+            ThisWorkbook.Sheets(ws).Cells(i, 10).Value = closepri - openpri
+            
+            ' Percent Change
+            ThisWorkbook.Sheets(ws).Cells(i, 11).Value = (closepri - openpri) / closepri
+            
+            ' Total Volume Stock
+            ThisWorkbook.Sheets(ws).Cells(i, 12).Value = volm
+            
+            i = i + 1
+            r = r + 1
+            
+        Loop
+    
+        ' Formatting and Conditional
+        ThisWorkbook.Sheets(ws).Columns(10).NumberFormat = "0.00"
+        ThisWorkbook.Sheets(ws).Columns(11).NumberFormat = "0.00%"
+        
+        ThisWorkbook.Sheets(ws).Activate
+        ThisWorkbook.Sheets(ws).Range("J2:K" + Trim(Str(i))).Select
+        Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlGreater, _
+            Formula1:="=0"
+        Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+        With Selection.FormatConditions(1).Interior
+            .PatternColorIndex = xlAutomatic
+            .Color = 5287936
+            .TintAndShade = 0
+        End With
+        Selection.FormatConditions(1).StopIfTrue = False
+        Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlLess, _
+            Formula1:="=0"
+        Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+        With Selection.FormatConditions(1).Interior
+            .PatternColorIndex = xlAutomatic
+            .Color = 255
+            .TintAndShade = 0
+        End With
+        Selection.FormatConditions(1).StopIfTrue = False
+        
+        ' Return the greatest tickers
+        incTik = ThisWorkbook.Sheets(ws).Cells(2, 9).Value
+        decTik = ThisWorkbook.Sheets(ws).Cells(2, 9).Value
+        volTik = ThisWorkbook.Sheets(ws).Cells(2, 9).Value
+        incPer = ThisWorkbook.Sheets(ws).Cells(2, 10).Value
+        decPer = ThisWorkbook.Sheets(ws).Cells(2, 11).Value
+        volMax = ThisWorkbook.Sheets(ws).Cells(2, 12).Value
+        
+        i = 2
+        Do Until IsEmpty(ThisWorkbook.Sheets(ws).Cells(i, 9))
+            If ThisWorkbook.Sheets(ws).Cells(i, 11).Value > incPer Then
+                incTik = ThisWorkbook.Sheets(ws).Cells(i, 9).Value
+                incPer = ThisWorkbook.Sheets(ws).Cells(i, 11).Value
+            ElseIf ThisWorkbook.Sheets(ws).Cells(i, 11).Value < decPer Then
+                decTik = ThisWorkbook.Sheets(ws).Cells(i, 9).Value
+                decPer = ThisWorkbook.Sheets(ws).Cells(i, 11).Value
+            ElseIf ThisWorkbook.Sheets(ws).Cells(i, 12).Value > volMax Then
+                volTik = ThisWorkbook.Sheets(ws).Cells(i, 9).Value
+                volMax = ThisWorkbook.Sheets(ws).Cells(i, 12).Value
+            End If
+            
+            i = i + 1
+        Loop
+        
+        ThisWorkbook.Sheets(ws).Cells(1, 16).Value = "Ticker"
+        ThisWorkbook.Sheets(ws).Cells(1, 17).Value = "Value"
+        ThisWorkbook.Sheets(ws).Cells(2, 15).Value = "Greatest % Increase"
+        ThisWorkbook.Sheets(ws).Cells(2, 16).Value = incTik
+        ThisWorkbook.Sheets(ws).Cells(2, 17).Value = incPer
+        ThisWorkbook.Sheets(ws).Cells(2, 17).NumberFormat = "0.00%"
+        ThisWorkbook.Sheets(ws).Cells(3, 15).Value = "Greatest % Decrease"
+        ThisWorkbook.Sheets(ws).Cells(3, 16).Value = decTik
+        ThisWorkbook.Sheets(ws).Cells(3, 17).Value = decPer
+        ThisWorkbook.Sheets(ws).Cells(3, 17).NumberFormat = "0.00%"
+        ThisWorkbook.Sheets(ws).Cells(4, 15).Value = "Greater Total Volume"
+        ThisWorkbook.Sheets(ws).Cells(4, 16).Value = volTik
+        ThisWorkbook.Sheets(ws).Cells(4, 17).Value = volMax
+        ThisWorkbook.Sheets(ws).Columns("A:O").AutoFit
+        
+        ws = ws + 1
+        DoEvents
+    Loop
+    
+End Sub
